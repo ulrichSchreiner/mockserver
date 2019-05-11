@@ -1,0 +1,15 @@
+- path: "^/user2$"
+  method: GET
+  output:
+    contentType: "text/xml"
+    response: |
+      <mydata>
+        <name>max</name>
+      </mydata>
+
+- path: "^/user$"
+  method: GET
+  output:
+    contentType: "application/json"
+    response: "{'name':'max'}"
+
