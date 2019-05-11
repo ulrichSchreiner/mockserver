@@ -1,3 +1,5 @@
+[![Build Status](https://cloud.drone.io/api/badges/ulrichSchreiner/mockserver/status.svg)](https://cloud.drone.io/ulrichSchreiner/mockserver)
+
 Mock your external REST API's with a local mock server.
 
 You have to write a short `yaml` file and start this server. It will respond to the
