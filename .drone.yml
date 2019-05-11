@@ -1,0 +1,12 @@
+kind: pipeline
+name: default
+
+steps:
+- name: docker
+  image: plugins/docker
+  settings:
+    repo: ulrichschreiner/mockserver
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
