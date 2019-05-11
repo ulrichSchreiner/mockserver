@@ -22,7 +22,7 @@ Example:
 ~~~
 
 Now start the mockserver:
-~~~
+~~~shell
 $ mockserver testfiles/usermocks.yaml
 using mocks ...
 - header: {}
@@ -44,7 +44,7 @@ start service localhost:9099 ...
 ~~~
 
 And now test your mocks:
-~~~
+~~~shell
 $ curl http://localhost:9099/user23
 $ curl http://localhost:9099/user2
 <mydata>
