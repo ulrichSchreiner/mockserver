@@ -8,14 +8,8 @@ action "Docker Login" {
     secrets = ["DOCKER_USERNAME", "DOCKER_PASSWORD"]
 }
 
-action "Build Image" {
+action "Publish Image" {
     needs = ["Docker Login"]
     uses = "./.github/devaction/"
-    args = ["make", "build"]
-}
-
-action "Publish Image" {
-    needs = ["Build Image"]
-    uses = "./.github/devaction/"
-    args = ["make", "push"]
+    args = ["make", "build", "push"]
 }
