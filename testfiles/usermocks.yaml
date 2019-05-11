@@ -1,4 +1,5 @@
-- path: "^/user2$"
+- name: get the user2 endpoint
+  path: "^/user2$"
   method: GET
   output:
     contentType: "text/xml"
@@ -7,7 +8,8 @@
         <name>max</name>
       </mydata>
 
-- path: "^/user$"
+- name: get the user endpoint
+  path: "^/user$"
   method: GET
   output:
     contentType: "application/json"

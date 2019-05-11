@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	"gopkg.in/yaml.v2"
+	"net/http"
 )
 
 /*
@@ -21,12 +22,14 @@ import (
 type serviceoutput struct {
 	ContentType string `yaml:"contentType"`
 	Response    string `yaml:"response"`
+	Code        int    `yaml:"code"`
 }
 type serviceEntry struct {
 	Header map[string]string `yaml:"header"`
 	Output serviceoutput     `yaml:"output"`
 	Method string            `yaml:"method"`
 	Path   string            `yaml:"path"`
+	Name   string            `yaml:"name"`
 	pathre *regexp.Regexp
 }
 
@@ -44,6 +47,9 @@ func readServices(in io.Reader) (services, error) {
 			return nil, fmt.Errorf("cannot compile %q as a regeexp: %v", se.Path, err)
 		}
 		res[p].pathre = pathre
+		if se.Output.Code == 0 {
+			res[p].Output.Code = http.StatusOK
+		}
 	}
 	return res, nil
 }

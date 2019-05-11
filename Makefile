@@ -1,3 +1,5 @@
+export GO111MODULE := on
+
 .PHONY:
 build:
 	go build

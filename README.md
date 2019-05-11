@@ -7,7 +7,8 @@ given endpoints with the specified content.
 
 Example:
 ~~~yaml
-- path: "^/user2$"
+- name: the user2 endpoint
+  path: "^/user2$"
   method: GET
   output:
     contentType: "text/xml"
@@ -16,7 +17,8 @@ Example:
         <name>max</name>
       </mydata>
 
-- path: "^/user$"
+- name: the user endpoint
+  path: "^/user$"
   method: GET
   output:
     contentType: "application/json"

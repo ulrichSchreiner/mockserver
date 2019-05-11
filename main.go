@@ -8,10 +8,12 @@ import (
 	"os"
 
 	"gopkg.in/yaml.v2"
+	"net/http/httputil"
 )
 
 var (
 	listen = flag.String("address", "localhost:9099", "sets the listen port")
+	debug  = flag.Bool("debug", false, "use request logging")
 )
 
 func main() {
@@ -40,12 +42,18 @@ func main() {
 
 func handleMocks(srvs services) http.Handler {
 	return http.HandlerFunc(func(rsp http.ResponseWriter, rq *http.Request) {
+		if *debug {
+			out, _ := httputil.DumpRequest(rq, true)
+			log.Printf("REQUEST: %s\n", string(out))
+		}
 		for _, srv := range srvs {
 			if matchService(srv, rq) {
 				if srv.Output.ContentType != "" {
 					rsp.Header().Add("Content-Type", srv.Output.ContentType)
 				}
+				rsp.WriteHeader(srv.Output.Code)
 				fmt.Fprint(rsp, srv.Output.Response)
+				log.Printf("[INFO] use handler '%s %s'", srv.Method, srv.Name)
 				return
 			}
 		}
@@ -58,7 +66,6 @@ func matchService(s serviceEntry, rq *http.Request) bool {
 		return false
 	}
 	for k, v := range s.Header {
-		log.Printf("check header %s/%s", k, v)
 		rqval := rq.Header.Get(k)
 		if rqval != v {
 			return false
