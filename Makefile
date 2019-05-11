@@ -4,8 +4,8 @@ build:
 
 .PHONY:
 dockerbuild:
-	docker build -t ulrichschreiner/mockserver .
+	docker build -t ulrichschreiner/mockserver:latest .
 
 .PHONY:
 push:
-	docker push ulrichschreiner/mockserver
+	docker push ulrichschreiner/mockserver:latest
