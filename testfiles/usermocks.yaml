@@ -15,3 +15,18 @@
     contentType: "application/json"
     response: "{'name':'{{ .RQ.name }}', 'id':'{{ .PATH.id }}'}"
 
+- name: post a new user
+  path: "^/user$"
+  method: POST
+  output:
+    contentType: "application/json"
+    response: |
+      {{ jsonpath .BODY "$.name"}}
+
+- name: post a new user as xml
+  path: "^/user/xml$"
+  method: POST
+  output:
+    contentType: "text/xml"
+    response: |
+      {{ xmlpath .BODY "/user/name"}}

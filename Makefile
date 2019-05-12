@@ -14,4 +14,4 @@ push:
 
 .PHONY:
 localtestservice:
-	go run *.go testfiles/usermocks.yaml
+	go run *.go -debug=true testfiles/usermocks.yaml

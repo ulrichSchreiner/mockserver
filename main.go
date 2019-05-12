@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"log"
@@ -8,6 +9,8 @@ import (
 	"os"
 
 	"net/http/httputil"
+
+	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
 )
@@ -47,7 +50,9 @@ func handleMocks(srvs services) http.Handler {
 			out, _ := httputil.DumpRequest(rq, true)
 			log.Printf("REQUEST: %s\n", string(out))
 		}
-		rq.ParseForm()
+		if rq.Header.Get("Content-Type") == "application/x-www-form-urlencoded" && rq.Method == http.MethodGet {
+			rq.ParseForm()
+		}
 		templatedata := rqdata(rq)
 		for _, srv := range srvs {
 			match, pathvars := matchService(srv, rq)
@@ -57,10 +62,15 @@ func handleMocks(srvs services) http.Handler {
 					rsp.Header().Add("Content-Type", srv.Output.ContentType)
 				}
 				rsp.WriteHeader(srv.Output.Code)
-				err := srv.Output.response.Execute(rsp, templatedata)
+				var buf bytes.Buffer
+				err := srv.Output.response.Execute(&buf, templatedata)
 				if err != nil {
 					log.Printf("[ERROR] cannot render template: %v", err)
 				}
+				if *debug {
+					log.Printf("RESPONSE: %s\n", buf.String())
+				}
+				rsp.Write(buf.Bytes())
 				log.Printf("[INFO] use handler '%s %s'", srv.Method, srv.Name)
 				return
 			}
@@ -79,9 +89,12 @@ func rqdata(rq *http.Request) map[string]interface{} {
 	for k := range rq.Form {
 		rqparams[k] = rq.FormValue(k)
 	}
+	body, _ := ioutil.ReadAll(rq.Body)
+
 	return map[string]interface{}{
 		"RQ":     rqparams,
 		"HEADER": headers,
+		"BODY":   string(body),
 	}
 }
 

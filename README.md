@@ -61,3 +61,22 @@ $ curl http://localhost:9099/user/123?name=max
 
 Please make sure, your entries in the yaml file have the correct order. They are processed in order and
 the first match will win.
+
+You can also take data from posted data (json or xml) and use the data in the output:
+~~~yaml
+- name: post a new user
+  path: "^/user$"
+  method: POST
+  output:
+    contentType: "application/json"
+    response: |
+      {{ jsonpath .BODY "$.name"}}
+
+- name: post a new user as xml
+  path: "^/user/xml$"
+  method: POST
+  output:
+    contentType: "text/xml"
+    response: |
+      {{ xmlpath .BODY "/user/name"}}
+~~~
