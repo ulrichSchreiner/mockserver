@@ -3,7 +3,8 @@
 Mock your external REST API's with a local mock server.
 
 You have to write a short `yaml` file and start this server. It will respond to the
-given endpoints with the specified content.
+given endpoints with the specified content. You can use static ouput or render header,
+request or path variables from the request into the output.
 
 Example:
 ~~~yaml
@@ -17,12 +18,12 @@ Example:
         <name>max</name>
       </mydata>
 
-- name: the user endpoint
-  path: "^/user$"
+- name: get the user endpoint
+  path: "^/user/(?P<id>.*)$"
   method: GET
   output:
     contentType: "application/json"
-    response: "{'name':'max'}"
+    response: "{'name':'{{ .RQ.name }}', 'id':'{{ .PATH.id }}'}"
 ~~~
 
 Now start the mockserver:
@@ -54,7 +55,9 @@ $ curl http://localhost:9099/user2
 <mydata>
   <name>max</name>
 </mydata>
-$ curl http://localhost:9099/user
-{'name':'max'}
+$ curl http://localhost:9099/user/123?name=max
+{'name':'max', 'id':'123'}
 ~~~
 
+Please make sure, your entries in the yaml file have the correct order. They are processed in order and
+the first match will win.

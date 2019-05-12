@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"gopkg.in/yaml.v2"
 	"net/http/httputil"
+
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -46,13 +47,20 @@ func handleMocks(srvs services) http.Handler {
 			out, _ := httputil.DumpRequest(rq, true)
 			log.Printf("REQUEST: %s\n", string(out))
 		}
+		rq.ParseForm()
+		templatedata := rqdata(rq)
 		for _, srv := range srvs {
-			if matchService(srv, rq) {
+			match, pathvars := matchService(srv, rq)
+			if match {
+				templatedata["PATH"] = pathvars
 				if srv.Output.ContentType != "" {
 					rsp.Header().Add("Content-Type", srv.Output.ContentType)
 				}
 				rsp.WriteHeader(srv.Output.Code)
-				fmt.Fprint(rsp, srv.Output.Response)
+				err := srv.Output.response.Execute(rsp, templatedata)
+				if err != nil {
+					log.Printf("[ERROR] cannot render template: %v", err)
+				}
 				log.Printf("[INFO] use handler '%s %s'", srv.Method, srv.Name)
 				return
 			}
@@ -61,16 +69,44 @@ func handleMocks(srvs services) http.Handler {
 	})
 }
 
-func matchService(s serviceEntry, rq *http.Request) bool {
+func rqdata(rq *http.Request) map[string]interface{} {
+	rqparams := make(map[string]string)
+	headers := make(map[string]string)
+
+	for k := range rq.Header {
+		headers[k] = rq.Header.Get(k)
+	}
+	for k := range rq.Form {
+		rqparams[k] = rq.FormValue(k)
+	}
+	return map[string]interface{}{
+		"RQ":     rqparams,
+		"HEADER": headers,
+	}
+}
+
+func matchService(s serviceEntry, rq *http.Request) (bool, map[string]string) {
 	if rq.Method != s.Method {
-		return false
+		return false, nil
 	}
 	for k, v := range s.Header {
 		rqval := rq.Header.Get(k)
 		if rqval != v {
-			return false
+			return false, nil
 		}
 	}
-
-	return s.pathre.MatchString(rq.RequestURI)
+	m := s.pathre.MatchString(rq.URL.Path)
+	pathvars := make(map[string]string)
+	if m {
+		if len(s.pathvars) > 0 {
+			subm := s.pathre.FindStringSubmatch(rq.URL.Path)
+			for i, p := range s.pathvars {
+				subidx := i + 1
+				if len(subm) > subidx {
+					pathvars[p] = subm[subidx]
+				}
+			}
+		}
+	}
+	return m, pathvars
 }

@@ -9,9 +9,9 @@
       </mydata>
 
 - name: get the user endpoint
-  path: "^/user$"
+  path: "^/user/(?P<id>.*)$"
   method: GET
   output:
     contentType: "application/json"
-    response: "{'name':'max'}"
+    response: "{'name':'{{ .RQ.name }}', 'id':'{{ .PATH.id }}'}"
 

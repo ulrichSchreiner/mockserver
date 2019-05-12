@@ -11,3 +11,7 @@ dockerbuild:
 .PHONY:
 push:
 	docker push ulrichschreiner/mockserver:latest
+
+.PHONY:
+localtestservice:
+	go run *.go testfiles/usermocks.yaml
