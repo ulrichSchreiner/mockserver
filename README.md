@@ -1,4 +1,4 @@
-[![Build Status](https://drone.protegear.io/api/badges/ulrichSchreiner/mockserver/status.svg)](https://drone.protegear.io/ulrichSchreiner/mockserver)
+[![Build Status](https://github.drone.protegear.io/api/badges/ulrichSchreiner/mockserver/status.svg)](https://github.drone.protegear.io/ulrichSchreiner/mockserver)
 
 Mock your external REST API's with a local mock server.
 
