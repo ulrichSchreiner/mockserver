@@ -80,3 +80,4 @@ You can also take data from posted data (json or xml) and use the data in the ou
     response: |
       {{ xmlpath .BODY "/user/name"}}
 ~~~
+
