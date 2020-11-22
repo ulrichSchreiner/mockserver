@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"net/http/httputil"
 
@@ -55,7 +56,7 @@ func handleMocks(srvs services) http.Handler {
 		}
 		templatedata := rqdata(rq)
 		for _, srv := range srvs {
-			match, pathvars := matchService(srv, rq)
+			match, pathvars := matchService(srv, rq, templatedata["BODY"].(string))
 			if match {
 				templatedata["PATH"] = pathvars
 				if srv.Output.ContentType != "" {
@@ -98,7 +99,7 @@ func rqdata(rq *http.Request) map[string]interface{} {
 	}
 }
 
-func matchService(s serviceEntry, rq *http.Request) (bool, map[string]string) {
+func matchService(s serviceEntry, rq *http.Request, body string) (bool, map[string]string) {
 	if rq.Method != s.Method {
 		return false, nil
 	}
@@ -109,6 +110,9 @@ func matchService(s serviceEntry, rq *http.Request) (bool, map[string]string) {
 		}
 	}
 	m := s.pathre.MatchString(rq.URL.Path)
+	if s.BodyMatch != "" {
+		m = strings.Contains(body, s.BodyMatch)
+	}
 	pathvars := make(map[string]string)
 	if m {
 		if len(s.pathvars) > 0 {

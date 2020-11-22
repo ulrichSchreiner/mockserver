@@ -33,13 +33,14 @@ type serviceoutput struct {
 	response    *template.Template
 }
 type serviceEntry struct {
-	Header   map[string]string `yaml:"header"`
-	Output   serviceoutput     `yaml:"output"`
-	Method   string            `yaml:"method"`
-	Path     string            `yaml:"path"`
-	Name     string            `yaml:"name"`
-	pathre   *regexp.Regexp
-	pathvars []string
+	Header    map[string]string `yaml:"header"`
+	Output    serviceoutput     `yaml:"output"`
+	Method    string            `yaml:"method"`
+	Path      string            `yaml:"path"`
+	Name      string            `yaml:"name"`
+	BodyMatch string            `yaml:"bodymatch"`
+	pathre    *regexp.Regexp
+	pathvars  []string
 }
 
 type services []serviceEntry
