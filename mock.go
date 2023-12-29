@@ -34,6 +34,7 @@ type serviceoutput struct {
 }
 type serviceEntry struct {
 	Header    map[string]string `yaml:"header"`
+	Params 	  map[string]string `yaml:"params"`
 	Output    serviceoutput     `yaml:"output"`
 	Method    string            `yaml:"method"`
 	Path      string            `yaml:"path"`

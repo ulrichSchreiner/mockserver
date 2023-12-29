@@ -109,6 +109,18 @@ func matchService(s serviceEntry, rq *http.Request, body string) (bool, map[stri
 			return false, nil
 		}
 	}
+	frm := rq.Form
+	qry := rq.URL.Query()
+	for k,v := range s.Params {
+		pval := frm.Get(k)
+		if pval == "" {
+			pval = qry.Get(k)
+		}
+		if pval != v {
+			fmt.Printf("wrong pval: %q != %q\n",pval, v)
+			return false, nil
+		}
+	}
 	m := s.pathre.MatchString(rq.URL.Path)
 	if s.BodyMatch != "" {
 		m = strings.Contains(body, s.BodyMatch)
