@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
 	"regexp"
 
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"text/template"
@@ -34,7 +36,7 @@ type serviceoutput struct {
 }
 type serviceEntry struct {
 	Header    map[string]string `yaml:"header"`
-	Params 	  map[string]string `yaml:"params"`
+	Params    map[string]string `yaml:"params"`
 	Output    serviceoutput     `yaml:"output"`
 	Method    string            `yaml:"method"`
 	Path      string            `yaml:"path"`
@@ -48,8 +50,9 @@ type services []serviceEntry
 
 var (
 	funcmap = template.FuncMap{
-		"jsonpath": jsonpt,
-		"xmlpath":  xmlpt,
+		"jsonpath":    jsonpt,
+		"xmlpath":     xmlpt,
+		"embedBase64": embedBase64,
 	}
 )
 
@@ -113,4 +116,12 @@ func xmlpt(data, key string) string {
 		return value
 	}
 	return fmt.Sprintf("%s not found", key)
+}
+
+func embedBase64(path string) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Sprintf("cannot open path %s: %v", path, err)
+	}
+	return base64.StdEncoding.EncodeToString(data)
 }

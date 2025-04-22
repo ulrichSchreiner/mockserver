@@ -4,7 +4,7 @@ WORKDIR /mockserver
 COPY . .
 RUN CGO_ENABLED=0 go build
 
-FROM ulrichschreiner/cacerts
+FROM registry.gitlab.com/ulrichschreiner/cacerts:latest
 #FROM alpine
 COPY --from=builder /mockserver/mockserver /mockserver
 EXPOSE 9099
