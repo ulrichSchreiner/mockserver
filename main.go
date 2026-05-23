@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"net/http/httputil"
-
-	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
 )
@@ -51,13 +50,13 @@ func handleMocks(srvs services) http.Handler {
 			out, _ := httputil.DumpRequest(rq, true)
 			log.Printf("REQUEST: %s\n", string(out))
 		}
-		if rq.Header.Get("Content-Type") == "application/x-www-form-urlencoded" && rq.Method == http.MethodGet {
-			rq.ParseForm()
-		}
+		// alway parse form, not only url-encoded GET request
+		_ = rq.ParseForm()
 		templatedata := rqdata(rq)
 		for _, srv := range srvs {
 			match, pathvars := matchService(srv, rq, templatedata["BODY"].(string))
 			if match {
+				log.Printf("[INFO] use handler '%s %s'", srv.Method, srv.Name)
 				templatedata["PATH"] = pathvars
 				if srv.Output.ContentType != "" {
 					rsp.Header().Add("Content-Type", srv.Output.ContentType)
@@ -72,7 +71,6 @@ func handleMocks(srvs services) http.Handler {
 					log.Printf("RESPONSE: %s\n", buf.String())
 				}
 				rsp.Write(buf.Bytes())
-				log.Printf("[INFO] use handler '%s %s'", srv.Method, srv.Name)
 				return
 			}
 		}
@@ -90,7 +88,7 @@ func rqdata(rq *http.Request) map[string]interface{} {
 	for k := range rq.Form {
 		rqparams[k] = rq.FormValue(k)
 	}
-	body, _ := ioutil.ReadAll(rq.Body)
+	body, _ := io.ReadAll(rq.Body)
 
 	return map[string]interface{}{
 		"RQ":     rqparams,
@@ -111,13 +109,12 @@ func matchService(s serviceEntry, rq *http.Request, body string) (bool, map[stri
 	}
 	frm := rq.Form
 	qry := rq.URL.Query()
-	for k,v := range s.Params {
+	for k, v := range s.Params {
 		pval := frm.Get(k)
 		if pval == "" {
 			pval = qry.Get(k)
 		}
 		if pval != v {
-			fmt.Printf("wrong pval: %q != %q\n",pval, v)
 			return false, nil
 		}
 	}
